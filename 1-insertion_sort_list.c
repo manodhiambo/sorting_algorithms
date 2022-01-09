@@ -1,82 +1,44 @@
 #include "sort.h"
 
 /**
- * _swap - Swaps two nodes of doubly linked list
- *
- * @node: node base to change
- * @list: double link list head
- *
- * Return: No Return
- */
-void _swap(listint_t **node, listint_t **list)
-{
-	listint_t *tmp = *node, *tmp2, *tmp3;
-
-	if (!(*node)->prev)
-		*list = (*node)->next;
-
-	tmp = tmp3 = *node;
-	tmp2 = tmp->next;
-
-	tmp->next = tmp2->next;
-	tmp3 = tmp->prev;
-	tmp->prev = tmp2;
-	tmp2->next = tmp;
-	tmp2->prev = tmp3;
-
-	if (tmp2->prev)
-		tmp2->prev->next = tmp2;
-
-
-	if (tmp->next)
-		tmp->next->prev = tmp;
-
-	*node = tmp2;
-
-}
-/**
- * insertion_sort_list - sorts a doubly linked list of integers
- * in ascending order using the Insertion sort algorithm
- *
- * @list: doubly linked list
- *
+ * insertion_sort_list - insertion sort list algorthms
+ * @list: list pointer
  * Return: No Return
  */
 void insertion_sort_list(listint_t **list)
 {
-	listint_t  *head = *list, *tback, *aux;
+	listint_t *curr, *swap, *tmp;
 
-	if (!head || (!(head->prev) && !(head->next)))
+	if (!list || *list == NULL)
 		return;
-
-	while (head && head->next)
+	curr = *list;
+	/* validate if there is only one element in list */
+	if (curr->next == NULL)
+		return;
+	while (curr->next != NULL)
 	{
-		if (head->n > head->next->n)
+		swap = curr->next;
+		/* Comparison starts here */
+		if (curr->n > swap->n)
 		{
-			aux = head;
-
-			_swap(&aux, list);
-			print_list(*list);
-			head = aux;
-			tback = aux;
-
-			while (tback && tback->prev)
+			tmp = curr;
+			while (tmp != NULL && tmp->n > swap->n)
 			{
-
-				if (tback->n < tback->prev->n)
-				{
-					aux = tback->prev;
-
-					_swap(&(aux), list);
-
-					print_list(*list);
-					tback = aux->next;
-				}
-
-				tback = tback->prev;
+				tmp->next = swap->next;
+				if (tmp->next != NULL)
+					tmp->next->prev = tmp;
+				swap->prev = tmp->prev;
+				if (swap->prev != NULL)
+					swap->prev->next = swap;
+				else
+					*list = swap;
+				tmp->prev = swap;
+				swap->next = tmp;
+				print_list(*list);
+				tmp = swap->prev;
 			}
-
+			continue;
 		}
-		head = head->next;
+		curr = curr->next;
 	}
 }
