@@ -1,72 +1,86 @@
 #include "sort.h"
 
 /**
- * hoare_partition - crates a partition following the Hoare partition scheme
+ * myswapy - swaps values
  *
- * @array: the array to sort
- * @low: the lowest position of the partition
- * @high: the highes position of the partition
- * @size: the size of the array
+ * @array: sort data
+ * @i: first num
+ * @j: second num
  *
- * Return: the position to perform recursion
+ * Return: No Return
  */
-
-int hoare_partition(int *array, int low, int high, size_t size)
+void myswapy(int *array, int i, int j)
 {
-	int pivot, i, j, save;
+	int tmp;
 
-	pivot = array[high];
-	i = low - 1;
-	j = high + 1;
-	while (1)
+	tmp = array[i];
+	array[i] = array[j];
+	array[j] = tmp;
+}
+
+/**
+ * part - sorts a partition
+ *
+ * @array: data to sort
+ * @left: left
+ * @right: right
+ * @size: size of data
+ *
+ * Return: Pivote new
+ */
+int part(int *array, int left, int right, size_t size)
+{
+	int i, j, pivot = array[right];
+
+	for (i = left, j = right; 1; i++, j--)
 	{
-		do {
+		while (array[i] < pivot)
 			i++;
-		} while (array[i] < pivot);
-		do {
-			j = j - 1;
-		} while (array[j] > pivot);
-		if (i > j)
-		{
-			return (j);
-		}
-		save = array[i];
-		array[i] = array[j];
-		array[j] = save;
+
+		while (array[j] > pivot)
+			j--;
+
+		if (i >= j)
+			return (i);
+		myswapy(array, i, j);
 		print_array(array, size);
 	}
 }
 
 /**
- * quick - performs the recursion of the quicksort algorithm
+ * myquicksort -  sorts with Quick sort algorithm Lomuto partition scheme
  *
- * @array: array to sort
- * @low: lowest position
- * @high: highest position
- * @size: size of the array
+ * @array: data to sort
+ * @left: left
+ * @right: right
+ * @size: size data
+ *
+ * Return: No Return
  */
-
-void quick(int *array, int low, int high, size_t size)
+void myquicksort(int *array, int left, int right, size_t size)
 {
-	int pos;
+	int pivote;
 
-	if (low < high)
+	if (left < right)
 	{
-		pos  = hoare_partition(array, low, high, size);
-		quick(array, low, pos, size);
-		quick(array, pos  + 1, high, size);
+		pivote = part(array, left, right, size);
+		myquicksort(array, left, pivote - 1, size);
+		myquicksort(array, pivote, right, size);
 	}
 }
 
 /**
- * quick_sort_hoare - sort an array by quicksort method
- * @array: array to be sorted
- * @size: size of the array
+ * quick_sort_hoare -  sorts an array withh Quick sort algorithm Hoare
  *
- * Return: Nothing, it's a void functions
+ * @array: data to sort
+ * @size: size of data
+ *
+ * Return: No Return
  */
-
 void quick_sort_hoare(int *array, size_t size)
 {
-	quick(array, 0, (int)size - 1, size);
+	if (!array || size < 2)
+		return;
+
+	myquicksort(array, 0, size - 1, size);
 }
