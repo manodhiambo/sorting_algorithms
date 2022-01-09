@@ -1,99 +1,101 @@
+#include <stdlib.h>
 #include "sort.h"
-
 /**
- *counting_sort_radix - sort and array by counting sort method
- *and rearange it starting by the end
- *@array: array of digits
- *@real_array: array of complete values
- *@size: size of the array
+ * csort2 - auxiliary function of radix sort
  *
- *Return: Nothing, it's a void function
+ * @array: array of data to be sorted
+ * @buff: malloc buffer
+ * @size: size of data
+ * @lsd: Less significant digit
+ *
+ * Return: No Return
  */
-
-void counting_sort_radix(int *array, int *real_array, size_t size)
+void csort2(int *array, int **buff, int size, int lsd)
 {
-	size_t k;
-	int max_num, i, j;
-	int *count_array, *sort_array;
+	int i, j, csize = 10, num;
+	int carr[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	int carr2[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-	(void)real_array;
-	max_num = array[0];
-	sort_array = malloc(size * sizeof(int));
-	if (sort_array == NULL)
+	for (i = 0; i < size; i++)
 	{
-		free(sort_array);
-		return;
+		num = array[i];
+		for (j = 0; j < lsd; j++)
+			if (j > 0)
+				num = num / 10;
+		num = num % 10;
+		buff[num][carr[num]] = array[i];
+		carr[num] += 1;
 	}
-	for (k = 0; k < size; k++)
+
+	for (i = 0, j = 0; i < csize; i++)
 	{
-		sort_array[k] = array[k];
-		if (array[k] > max_num)
-			max_num = array[k];
+		while (carr[i] > 0)
+		{
+			array[j] = buff[i][carr2[i]];
+			carr2[i] += 1, carr[i] -= 1;
+			j++;
+		}
 	}
-	count_array = malloc((max_num + 1) * sizeof(int));
-	if (count_array == NULL)
-	{
-		free(count_array);
-		return;
-	}
-	for (i = 0; i <= max_num; i++)
-		count_array[i] = 0;
-	for (k = 0; k < size; k++)
-		count_array[array[k]]++;
-	for (i = 1; i <= max_num; i++)
-		count_array[i] = count_array[i] + count_array[i - 1];
-	for (j = (int)size - 1; j >= 0; j--)
-	{
-		sort_array[count_array[array[j]] - 1] = real_array[j];
-		count_array[array[j]] = count_array[array[j]] - 1;
-	}
-	for (k = 0; k < size; k++)
-		real_array[k] = sort_array[k];
-	free(count_array);
-	free(sort_array);
+
+	print_array(array, size);
 }
-
 /**
- *radix_sort - sort an array based in radix sort
- *@array: unordered array to sort
- *@size: size of the array
+ * csort - auxiliary function of radix sort
  *
- *Return: Nothing, it's a void
+ * @array: array of data to be sorted
+ * @size: size of data
+ * @lsd: Less significant digit
+ *
+ * Return: No Return
  */
+void csort(int *array, int size, int lsd)
+{
+	int carr[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	int i, j, num, csize = 10, **buff;
 
+	for (i = 0; i < size; i++)
+	{
+		num = array[i];
+		for (j = 0; j < lsd; j++)
+			if (j > 0)
+				num = num / 10;
+		num = num % 10;
+		carr[num] += 1;
+	}
+
+	if (carr[0] == size)
+		return;
+
+	buff = malloc(sizeof(int *) * 10);
+	if (!buff)
+		return;
+
+	for (i = 0; i < csize; i++)
+		if (carr[i] != 0)
+			buff[i] = malloc(sizeof(int) * carr[i]);
+
+
+	csort2(array, buff, size, lsd);
+
+	csort(array, size, lsd + 1);
+
+	for (i = 0; i < csize; i++)
+		if (carr[i] > 0)
+			free(buff[i]);
+	free(buff);
+}
+/**
+ * radix_sort - sorts an array of integers in ascending order using the Radix
+ * sort algorithm
+ *
+ * @array: array of data to be sorted
+ * @size: size of data
+ *
+ * Return: No Return
+ */
 void radix_sort(int *array, size_t size)
 {
-	int max_num, i, j, n_dig, res_mx_num, mul_f, div_f;
-	int *sort_array;
-
-	max_num = array[0];
-	mul_f = 10;
-	div_f = 1;
-	sort_array = malloc(size * sizeof(int));
-	if (sort_array ==  NULL)
-	{
-		free(sort_array);
+	if (size < 2)
 		return;
-	}
-	for (i = 0; i < (int)size; i++)
-	{
-		if (array[i] > max_num)
-			res_mx_num = max_num = array[i];
-	}
-	for (i = 10, n_dig = 0; res_mx_num != 0; i = i * 10, n_dig++)
-	{
-		res_mx_num = max_num;
-		res_mx_num = res_mx_num / i;
-	}
-	for (j = 0; j < n_dig; j++)
-	{
-		for (i = 0; i < (int)size; i++)
-			sort_array[i] = (array[i] % mul_f) / div_f;
-		counting_sort_radix(sort_array, array, size);
-		print_array(array, size);
-		mul_f = mul_f * 10;
-		div_f = div_f * 10;
-	}
-	free(sort_array);
-
+	csort(array, size, 1);
 }
